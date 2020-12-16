@@ -89,7 +89,7 @@ class Codepay extends AbstractPayment
         $query = $urls . '&sign=' . md5($sign . $codepay_key); //创建订单所需的参数
         $url = 'https://codepay.fateqq.com/creat_order/?' . $query; //支付页面
 
-        return json_encode(['code' => 0, 'url' => $url]);
+        return json_encode(['code' => 0, 'url' => $url, 'pid' => $pl->tradeno]);
     }
 
     public function notify($request, $response, $args)

@@ -1317,7 +1317,7 @@ class UserController extends BaseController
                 $text = '有新工单需要您处理';
                 try {
                     Mail::send($to, $subject, 'ticket/new_ticket.tpl', [
-                        'user' => $this->user, 'admin' =>$user, 'text' => $text, 'title' => $title, 'content' => $content, 'ticket_url' =>$ticket_url 
+                        'user' => $this->user, 'admin' =>$user, 'text' => $text, 'title' => $title, 'content' => $content, 'ticket_url' =>$ticket_url
                     ], [
                     ]);
                 } catch (Exception $e) {
@@ -1342,7 +1342,7 @@ class UserController extends BaseController
                     try {
                         $bot->sendMessage($user->telegram_id, $messageText, null, null, null, $keyboard);
                     } catch (Exception $e) {
-                        
+
                     }
                 }
             }
@@ -1486,7 +1486,7 @@ class UserController extends BaseController
                 file_get_contents('https://sc.ftqq.com/' . $ScFtqq_SCKEY . '.send', false, $context);
             }
         }
-        
+
 
         $antiXss = new AntiXSS();
 
@@ -2032,14 +2032,14 @@ class UserController extends BaseController
         $res['ret'] = 1;
         return $this->echoJson($response, $res);
     }
-    
+
     public function getPlanInfo($request, $response, $args)
     {
         $plan_time = $request->getQueryParams()['time'];
         $plan_num = $request->getQueryParams()['num'];
         if (empty($plan_num) || empty($plan_time)) {
             $res['ret'] = 0;
-            return $this->echoJson($response, $res); 
+            return $this->echoJson($response, $res);
         }
         $shop_id = (MalioConfig::get('plan_shop_id'))[$plan_num][$plan_time];
         $shop = Shop::where('id', $shop_id)->first();
@@ -2055,7 +2055,7 @@ class UserController extends BaseController
         $plan_num = $request->getQueryParams()['num'];
         if (empty($plan_num)) {
             $res['ret'] = 0;
-            return $this->echoJson($response, $res); 
+            return $this->echoJson($response, $res);
         }
         $plan_time = [];
         foreach ((MalioConfig::get('plan_shop_id'))[$plan_num] as $key => $value) {
@@ -2113,13 +2113,13 @@ class UserController extends BaseController
 
     public function share_account($request, $response, $args)
     {
-        return $this->view()->display('user/share_account.tpl'); 
+        return $this->view()->display('user/share_account.tpl');
     }
 
     public function qrcode($request, $response, $args)
     {
-        return $this->view()->display('user/qrcode.tpl'); 
-    } 
+        return $this->view()->display('user/qrcode.tpl');
+    }
 
     public function changeLang($request, $response, $args)
     {
@@ -2133,7 +2133,7 @@ class UserController extends BaseController
 
         $this->user->lang = $lang;
         $this->user->save();
-        
+
         $res['msg'] = 'yes';
         $res['ret'] = 1;
         return $this->echoJson($response, $res);
@@ -2235,134 +2235,32 @@ class UserController extends BaseController
         return $this->echoJson($response, $res);
     }
 
-    public function purchaseDirectly($request, $response, $args) {
-	// 测试的时候自动登录，真实情况下删除下面这行
-	// Auth::login($request->getParam('user_id'), 3600 * 24);
-	$shop = Shop::where('id', $request->getParam('product_id'))->where('status', 1)->first();
-
-        if (MalioConfig::get('shop_enable_trail_plan') == true && MalioConfig::get('shop_trail_plan_shopid') == $shop->id && $this->user->class >= 0) {
-            return $this->echoJson($response, [ 'success' => 1, 'bought' => 1]);
-        }
-
-        $code = trim($request->getParam('coupon'));
-
-        $credit = 0;
-        if ($code) {
-            $coupon = Coupon::where('code', $code)->first();
-
-            if ($coupon == null) {
-                $credit = 0;
-                return $this->echoJson($response, [ 'success' => 0, 'message' => '无效的优惠码']);
-           }
-
-           if ($coupon->onetime == 1) {
-	   	$onetime = true;
-           }
-
-	   $credit = $coupon->credit;
-
-            if ($coupon->order($shop->id) == false) {
-                return $this->echoJson($response, [ 'success' => 0, 'message' => '此优惠码不可用于此商品']);
-            }
-
-            if ($coupon->expire < time()) {
-                return $this->echoJson($response, [ 'success' => 0, 'message' => '此优惠码已过期']);
-            }
-        }
-
-        $user = Auth::getUser();
-        $toPayAmount = $shop->price * ((100 - $credit) / 100) - $user->money;
-
-        if ($toPayAmount <= 0) {
-            $params = $request->getParsedBody();
-            $params['shop'] = $request->getParam('product_id');
-            $params['disableothers'] = true;
-            $params['autorenew'] = true;
-            $params['coupon'] = $request->getParam('coupon');
-            $request = $request->withParsedBody($params);
-
-	    return $this->buyWithMyRespnose($request, $response, $args);
-        }
-
-	$type = strtoupper($request->getParam('type'));
-	if (!in_array($type, ['ALIPAY', 'WECHAT'])) {
-	    return $response->getBody()->write(json_encode(['success' => 0, 'message' => '收款渠道只支持微信和支付宝']));
-        }
-
-	// prepare request params 
-        switch (Config::get('payment_system')) {
-            case ('codepay'):
-	        if ($type == 'ALIPAY') {
-	            $type = 1;
-	        } else if ($type == 'WECHAT') {
-	            $type = 3;
-	        }
-
-		$params = $request->getParsedBody();
-		$params['price'] =$toPayAmount;
-		$params['type'] = $request->getParam('type');
-		$params['mobile'] = true;
-		$request = $request->withParsedBody($params);
-		break;
-            case ('bitpayx'):
-		$params = $request->getParsedBody();
-		$params['price'] =$toPayAmount;
-		$params['type'] = $type;
-		$params['mobile'] = true;
-		$request = $request->withParsedBody($params);
-		break;
-	   default:
-		return $response->getBody()->write(json_encode(['success' => 0, 'message' => '不支持当前支付方式: ' . Config::get('payment_system')]));
-	}
-
-        $result = Payment::purchase($request, $response, $args);
-	// 格式化返回值
-
-        switch (Config::get('payment_system')) {
-	  case 'codepay':
- 		$result = json_decode($result, true);
-                $data = [
-                    'success' => 1,
-                    'url' => $result['url'],
-                    'tradeno' => $result['pid'],
-                ];
-	  case 'bitpayx':
- 		$result = json_decode($result, true);
-		if ($result['errcode'] != 0 ) {
-		    return $response->getBody()->write(json_encode([ 'success' => 0, 'message' => $result['errmsg']]));
-		}
-                $data = [
-                    'success' => 1,
-                    'url' => $result['url'],
-                    'tradeno' => $result['pid'],
-                ];
-	}
-	file_put_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$data['tradeno']}", "{$shop->id},{$code}");
-	return $response->getBody()->write(json_encode($data));
-    }
-
-    public function getPurchaseDirectlyStatus($request, $response, $args) {
-        $return = [];
-        $p = \App\Models\Paylist::where('tradeno', $request->getParam('tradeno'))->first();
-        $return['ret'] = 1;
-        $return['result'] = $p->status;
-        return json_encode($return);
-    }
-
-    public function buyWithMyRespnose($request, $response, $args)
+    /**
+     * 客户端购买（无需提前充值）
+     * 请求参数：
+     *   - coupon
+     *   - shop
+     *   - autorenew
+     */
+    public function purchase($request, $response, $args)
     {
         $coupon = $request->getParam('coupon');
+        $coupon = trim($coupon);
+        $code = $coupon;
         $shop = $request->getParam('shop');
         $disableothers = $request->getParam('disableothers');
         $autorenew = $request->getParam('autorenew');
 
-        $coupon = trim($coupon);
-        $code = $coupon;
+        if (MalioConfig::get('shop_enable_trail_plan') == true && MalioConfig::get('shop_trail_plan_shopid') == $shop && $this->user->class >= 0) {
+            return 0;
+        };
 
         $shop = Shop::where('id', $shop)->where('status', 1)->first();
 
         if ($shop == null) {
-            return $this->echoJson($response, [ 'success' => 0, 'message' => '商品不存在']);
+            $res['ret'] = 0;
+            $res['msg'] = '非法请求';
+            return $response->getBody()->write(json_encode($res));
         }
 
         if ($coupon == '') {
@@ -2381,16 +2279,38 @@ class UserController extends BaseController
             }
 
             if ($coupon->order($shop->id) == false) {
-                return $this->echoJson($response, [ 'success' => 0, 'message' => '此优惠码不可用于此商品']);
+                $res['ret'] = 0;
+                $res['msg'] = '此优惠码不可用于此商品';
+                return $response->getBody()->write(json_encode($res));
             }
 
             if ($coupon->expire < time()) {
-                return $this->echoJson($response, [ 'success' => 0, 'message' => '此优惠码已过期']);
+                $res['ret'] = 0;
+                $res['msg'] = '此优惠码已过期';
+                return $response->getBody()->write(json_encode($res));
             }
         }
 
         $price = $shop->price * ((100 - $credit) / 100);
-        $user = Auth::getUser();
+        $user = $this->user;
+
+        if (!$user->isLogin) {
+            $res['ret'] = -1;
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        if (bccomp($user->money, $price, 2) == -1) {
+
+            $res['ret'] = 0;
+            $res['msg'] = '喵喵喵~ 当前余额不足，总价为' . $price . '元。</br><a href="/user/code">点击进入充值界面</a>';
+
+
+
+            return $response->getBody()->write(json_encode($res));
+
+
+
+        }
 
         $user->money = bcsub($user->money, $price, 2);
         $user->save();
@@ -2421,7 +2341,16 @@ class UserController extends BaseController
 
         $shop->buy($user);
 
-        return $this->echoJson($response, [ 'success' => 1, 'bought' => 1]);
+        $res['ret'] = 1;
+        $res['msg'] = '购买成功';
+
+        return $response->getBody()->write(json_encode($res));
     }
 
+    /**
+     * 获取支付状态
+     */
+    public function payment_status($request, $response, $args) {
+
+    }
 }

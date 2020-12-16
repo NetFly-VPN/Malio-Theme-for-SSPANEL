@@ -11,7 +11,10 @@ namespace App\Services\Gateway;
 use App\Models\Paylist;
 use App\Models\Payback;
 use App\Models\User;
+use App\Models\Shop;
 use App\Models\Code;
+use App\Models\Coupon;
+use App\Models\Bought;
 use App\Services\Config;
 use App\Utils\Telegram;
 use Slim\Http\{Request, Response};
@@ -90,7 +93,79 @@ abstract class AbstractPayment
                 Telegram::Send($user->user_name . ' 大老爷给我们捐了 ' . $codeq->number . ' 元！');
             }
         }
+
+
+	// 付款成功后，开通用户对应的商品
+	$content = file_get_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$pid}");
+	if ($content) {
+	    $parts = explode(",", $content);
+	    if (count($parts) === 2) {
+		$this->buyAfterPaymentNotify($parts[0], $parts[1], $user);
+	    }
+	}
+
         return 0;
+    }
+
+    public function buyAfterPaymentNotify($shop, $coupon, $user)
+    {
+        $disableothers = true;
+        $autorenew = false;
+
+        $coupon = trim($coupon);
+        $code = $coupon;
+
+        $shop = Shop::where('id', $shop)->where('status', 1)->first();
+
+        if (!$shop) {
+            return;
+        }
+
+        $credit = 0;
+        if ($coupon) {
+            $coupon = Coupon::where('code', $coupon)->first();
+
+            if ($coupon) {
+                if ($coupon->onetime == 1) {
+                    $onetime = true;
+                }
+
+                $credit = $coupon->credit;
+            }
+        }
+
+        $price = $shop->price * ((100 - $credit) / 100);
+
+        $user->money = bcsub($user->money, $price, 2);
+        $user->save();
+
+        if ($disableothers == 1) {
+            $boughts = Bought::where('userid', $user->id)->get();
+            foreach ($boughts as $disable_bought) {
+                $disable_bought->renew = 0;
+                $disable_bought->save();
+            }
+        }
+
+        $bought = new Bought();
+        $bought->userid = $user->id;
+        $bought->shopid = $shop->id;
+        $bought->datetime = time();
+        if ($autorenew == 0 || $shop->auto_renew == 0) {
+            $bought->renew = 0;
+        } else {
+            $bought->renew = time() + $shop->auto_renew * 86400;
+        }
+        if (isset($onetime)) {
+            $bought->renew = 0;
+        }
+        $bought->coupon = $code;
+        $bought->price = $price;
+        $bought->save();
+
+        $shop->buy($user);
+
+        return;
     }
 
     public function postPaymentMaliopay($pid, $method)

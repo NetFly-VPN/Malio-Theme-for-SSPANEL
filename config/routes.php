@@ -65,8 +65,12 @@ $app->post('/TelegramCallback', App\Controllers\HomeController::class . ':NewTel
 // Old Telegram
 $app->post('/telegram_callback', App\Controllers\HomeController::class . ':telegram');
 
+
 // User Center
 $app->group('/user', function () {
+  // 直接购买的接口
+  $this->post('/purchase_directly', App\Controllers\UserController::class . ':purchaseDirectly');
+  $this->get('/get_purchase_directly_status', App\Controllers\UserController::class . ':getPurchaseDirectlyStatus');
     $this->get('', App\Controllers\UserController::class . ':index');
     $this->get('/', App\Controllers\UserController::class . ':index');
     $this->post('/checkin', App\Controllers\UserController::class . ':doCheckin');

@@ -198,6 +198,7 @@ $app->group('/auth', function () {
     $this->post('/qrcode_login', App\Controllers\AuthController::class . ':qrcode_loginHandle');
     $this->get('/register', App\Controllers\AuthController::class . ':register');
     $this->post('/register', App\Controllers\AuthController::class . ':registerHandle');
+    $this->post('/register_app', App\Controllers\AuthController::class . ':registerAppHandle');
     $this->post('/send', App\Controllers\AuthController::class . ':sendVerify');
     $this->post('/sendsms', App\Controllers\AuthController::class . ':sendSMS');
     $this->get('/logout', App\Controllers\AuthController::class . ':logout');

@@ -676,6 +676,234 @@ class AuthController extends BaseController
         return $response->getBody()->write(json_encode($res));
     }
 
+    public function registerAppHandle($request, $response)
+    {
+        if (Config::get('register_mode') === 'close') {
+            $res['ret'] = 0;
+            $res['msg'] = '未开放注册。';
+            return $response->getBody()->write(json_encode($res));
+        }
+        $name = $request->getParam('name');
+        $email = $request->getParam('email');
+        $email = trim($email);
+        $email = strtolower($email);
+        $passwd = $request->getParam('passwd');
+        $repasswd = $request->getParam('repasswd');
+        $code = $request->getParam('code');
+        $code = trim($code);
+        $imtype = $request->getParam('imtype');
+        $emailcode = $request->getParam('emailcode');
+        $emailcode = trim($emailcode);
+        $wechat = $request->getParam('wechat');
+        $wechat = trim($wechat);
+        // check code
+
+        $sms_code = $request->getParam('sms_code');
+        $sms_code = trim($sms_code);
+        $phone = $request->getParam('phone');
+        $phone = trim($phone);
+
+        $area_code = $request->getParam('area_code');
+
+        $full_phone = $area_code.$phone;
+
+        //dumplin：1、邀请人等级为0则邀请码不可用；2、邀请人invite_num为可邀请次数，填负数则为无限
+        $c = InviteCode::where('code', $code)->first();
+        if ($c == null && MalioConfig::get('code_required') == true) {
+            if (Config::get('register_mode') === 'invite') {
+                $res['ret'] = 0;
+                $res['msg'] = '邀请码无效';
+                return $response->getBody()->write(json_encode($res));
+            }
+        } elseif ($c->user_id != 0) {
+            $gift_user = User::where('id', '=', $c->user_id)->first();
+            if ($gift_user == null) {
+                $res['ret'] = 0;
+                $res['msg'] = '邀请人不存在';
+                return $response->getBody()->write(json_encode($res));
+            }
+
+            if ($gift_user->class == 0 && MalioConfig::get('code_required') == true) {
+                $res['ret'] = 0;
+                $res['msg'] = '邀请人不是VIP';
+                return $response->getBody()->write(json_encode($res));
+            }
+
+            if ($gift_user->invite_num == 0 && MalioConfig::get('code_required') == true) {
+                $res['ret'] = 0;
+                $res['msg'] = '邀请人可用邀请次数为0';
+                return $response->getBody()->write(json_encode($res));
+            }
+        }
+
+
+        // check email format
+        if (!Check::isEmailLegal($email)) {
+            $res['ret'] = 0;
+            $res['msg'] = '邮箱无效';
+            return $response->getBody()->write(json_encode($res));
+        }
+        $email_postfix = '@'.(explode("@",$email)[1]);
+        if (in_array($email_postfix, MalioConfig::get('register_email_black_list')) == true) {
+            $res['ret'] = 0;
+            $res['msg'] = '邮箱后缀已被拉黑';
+            return $response->getBody()->write(json_encode($res));
+        }
+        if (MalioConfig::get('enable_register_email_restrict') == true) {
+            if (in_array($email_postfix, MalioConfig::get('register_email_white_list')) == false) {
+                $res['ret'] = 0;
+                $res['msg'] = '小老弟还会发送post请求啊';
+                return $response->getBody()->write(json_encode($res));
+            }
+        }
+        // check email
+        $user = User::where('email', $email)->first();
+        if ($user != null) {
+            $res['ret'] = 0;
+            $res['msg'] = '邮箱已经被注册了';
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        if (Config::get('enable_email_verify') == true) {
+            $mailcount = EmailVerify::where('email', '=', $email)->where('code', '=', $emailcode)->where('expire_in', '>', time())->first();
+            if ($mailcount == null) {
+                $res['ret'] = 0;
+                $res['msg'] = '您的邮箱验证码不正确';
+                return $response->getBody()->write(json_encode($res));
+            }
+        }
+
+        if (MalioConfig::get('enable_sms_verify') == true) {
+            $smscount = SmsVerify::where('phone', '=', $full_phone)->where('code', '=', $sms_code)->where('expire_in', '>', time())->first();
+            if ($smscount == null) {
+                $res['ret'] = 0;
+                $res['msg'] = '您的短信验证码不正确';
+                return $response->getBody()->write(json_encode($res));
+            }
+        }
+
+        // check pwd length
+        if (strlen($passwd) < 8) {
+            $res['ret'] = 0;
+            $res['msg'] = '密码请大于8位';
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        // check pwd re
+        if ($passwd != $repasswd) {
+            $res['ret'] = 0;
+            $res['msg'] = '两次密码输入不符';
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        /*
+        if ($imtype == '' || $wechat == '') {
+            $res['ret'] = 0;
+            $res['msg'] = '请填上你的联络方式';
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $user = User::where('im_value', $wechat)->where('im_type', $imtype)->first();
+        if ($user != null) {
+            $res['ret'] = 0;
+            $res['msg'] = '此联络方式已注册';
+            return $response->getBody()->write(json_encode($res));
+        }
+        */
+        if (Config::get('enable_email_verify') == true) {
+            EmailVerify::where('email', '=', $email)->delete();
+        }
+
+        if (MalioConfig::get('enable_sms_verify') == true) {
+            SmsVerify::where('phone', '=', $full_phone)->delete();
+        }
+
+        // do reg user
+        $user = new User();
+
+        $antiXss = new AntiXSS();
+
+
+        $user->user_name = $antiXss->xss_clean($name);
+        $user->email = $email;
+        $user->pass = Hash::passwordHash($passwd);
+        $user->passwd = Tools::genRandomChar(6);
+        $user->port = Tools::getAvPort();
+        $user->t = 0;
+        $user->u = 0;
+        $user->d = 0;
+        $user->method = Config::get('reg_method');
+        $user->protocol = Config::get('reg_protocol');
+        $user->protocol_param = Config::get('reg_protocol_param');
+        $user->obfs = Config::get('reg_obfs');
+        $user->obfs_param = Config::get('reg_obfs_param');
+        $user->forbidden_ip = Config::get('reg_forbidden_ip');
+        $user->forbidden_port = Config::get('reg_forbidden_port');
+        $user->im_type = $imtype;
+        $user->im_value = $antiXss->xss_clean($wechat);
+        $user->transfer_enable = Tools::toGB(Config::get('defaultTraffic'));
+        $user->invite_num = Config::get('inviteNum');
+        $user->auto_reset_day = Config::get('reg_auto_reset_day');
+        $user->auto_reset_bandwidth = Config::get('reg_auto_reset_bandwidth');
+        $user->money = 0;
+        if ($full_phone == '') {
+        	$user->phone = null;
+        } else {
+            $user->phone = $full_phone;	
+        }
+
+        //dumplin：填写邀请人，写入邀请奖励
+        $user->ref_by = 0;
+        if (($c != null) && $c->user_id != 0) {
+            $gift_user = User::where('id', '=', $c->user_id)->first();
+            if ($gift_user->invite_num != 0) {
+                $user->ref_by = $c->user_id;
+                $user->money = Config::get('invite_get_money');
+                $gift_user->transfer_enable += Config::get('invite_gift') * 1024 * 1024 * 1024;
+                --$gift_user->invite_num;
+                $gift_user->save();
+            };
+        }
+
+
+        $user->class_expire = date('Y-m-d H:i:s', time() + Config::get('user_class_expire_default') * 3600);
+        $user->class = Config::get('user_class_default');
+        $user->node_connector = Config::get('user_conn');
+        $user->node_speedlimit = Config::get('user_speedlimit');
+        $user->expire_in = date('Y-m-d H:i:s', time() + Config::get('user_expire_in_default') * 86400);
+        $user->reg_date = date('Y-m-d H:i:s');
+        $user->reg_ip = $_SERVER['REMOTE_ADDR'];
+        $user->plan = 'A';
+        $user->theme = Config::get('theme');
+
+        $groups = explode(',', Config::get('ramdom_group'));
+
+        $user->node_group = $groups[array_rand($groups)];
+
+        $ga = new GA();
+        $secret = $ga->createSecret();
+
+        $user->ga_token = $secret;
+        $user->ga_enable = 0;
+
+
+        /* malio 增加UUID */
+        $user->uuid = Uuid::uuid3(Uuid::NAMESPACE_DNS, ($user->passwd) . Config::get('key') . $user->id)->toString();
+        /* malio end */
+
+
+        if ($user->save()) {
+            $res['ret'] = 1;
+            $res['msg'] = '注册成功！正在进入登录界面';
+            Radius::Add($user, $user->passwd);
+            return $response->getBody()->write(json_encode($res));
+        }
+
+        $res['ret'] = 0;
+        $res['msg'] = '未知错误';
+        return $response->getBody()->write(json_encode($res));
+    }
+
     public function logout($request, $response, $next)
     {
         Auth::logout();

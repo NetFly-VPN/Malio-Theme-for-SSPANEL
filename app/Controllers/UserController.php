@@ -2236,9 +2236,9 @@ class UserController extends BaseController
     }
 
     public function purchaseDirectly($request, $response, $args) {
-	// 测试的时候自动登录，真实情况下删除下面这行
-	// Auth::login($request->getParam('user_id'), 3600 * 24);
-	$shop = Shop::where('id', $request->getParam('product_id'))->where('status', 1)->first();
+        // 测试的时候自动登录，真实情况下删除下面这行
+        // Auth::login($request->getParam('user_id'), 3600 * 24);
+        $shop = Shop::where('id', $request->getParam('product_id'))->where('status', 1)->first();
 
         if (MalioConfig::get('shop_enable_trail_plan') == true && MalioConfig::get('shop_trail_plan_shopid') == $shop->id && $this->user->class >= 0) {
             return $this->echoJson($response, [ 'success' => 1, 'bought' => 1]);
@@ -2253,13 +2253,13 @@ class UserController extends BaseController
             if ($coupon == null) {
                 $credit = 0;
                 return $this->echoJson($response, [ 'success' => 0, 'message' => '无效的优惠码']);
-           }
+            }
 
-           if ($coupon->onetime == 1) {
-	   	$onetime = true;
-           }
+            if ($coupon->onetime == 1) {
+                $onetime = true;
+            }
 
-	   $credit = $coupon->credit;
+            $credit = $coupon->credit;
 
             if ($coupon->order($shop->id) == false) {
                 return $this->echoJson($response, [ 'success' => 0, 'message' => '此优惠码不可用于此商品']);
@@ -2281,64 +2281,82 @@ class UserController extends BaseController
             $params['coupon'] = $request->getParam('coupon');
             $request = $request->withParsedBody($params);
 
-	    return $this->buyWithMyRespnose($request, $response, $args);
+            return $this->buyWithMyRespnose($request, $response, $args);
         }
 
-	$type = strtoupper($request->getParam('type'));
-	if (!in_array($type, ['ALIPAY', 'WECHAT'])) {
-	    return $response->getBody()->write(json_encode(['success' => 0, 'message' => '收款渠道只支持微信和支付宝']));
+        $type = strtoupper($request->getParam('type'));
+        if (!in_array($type, ['ALIPAY', 'WECHAT'])) {
+            return $response->getBody()->write(json_encode(['success' => 0, 'message' => '收款渠道只支持微信和支付宝']));
         }
-
-	// prepare request params 
+        // prepare request params
         switch (Config::get('payment_system')) {
             case ('codepay'):
-	        if ($type == 'ALIPAY') {
-	            $type = 1;
-	        } else if ($type == 'WECHAT') {
-	            $type = 3;
-	        }
+                if ($type == 'ALIPAY') {
+                    $type = 1;
+                } else if ($type == 'WECHAT') {
+                    $type = 3;
+                }
 
-		$params = $request->getParsedBody();
-		$params['price'] =$toPayAmount;
-		$params['type'] = $request->getParam('type');
-		$params['mobile'] = true;
-		$request = $request->withParsedBody($params);
-		break;
+                $params = $request->getParsedBody();
+                $params['price'] =$toPayAmount;
+                $params['type'] = $request->getParam('type');
+                $params['mobile'] = true;
+                $request = $request->withParsedBody($params);
+                break;
             case ('bitpayx'):
-		$params = $request->getParsedBody();
-		$params['price'] =$toPayAmount;
-		$params['type'] = $type;
-		$params['mobile'] = true;
-		$request = $request->withParsedBody($params);
-		break;
-	   default:
-		return $response->getBody()->write(json_encode(['success' => 0, 'message' => '不支持当前支付方式: ' . Config::get('payment_system')]));
-	}
+                $params = $request->getParsedBody();
+                $params['price'] =$toPayAmount;
+                $params['type'] = $type;
+                $params['mobile'] = true;
+                $request = $request->withParsedBody($params);
+                break;
+            case ('paybeaver'):
+                $params = $request->getParsedBody();
+                $params['amount'] =$toPayAmount;
+                $params['type'] = $type;
+                $request = $request->withParsedBody($params);
+                break;
+            default:
+                return $response->getBody()->write(json_encode(['success' => 0, 'message' => '不支持当前支付方式: ' . Config::get('payment_system')]));
+        }
 
         $result = Payment::purchase($request, $response, $args);
-	// 格式化返回值
+        // 格式化返回值
 
         switch (Config::get('payment_system')) {
-	  case 'codepay':
- 		$result = json_decode($result, true);
+            case 'codepay':
+                $result = json_decode($result, true);
                 $data = [
                     'success' => 1,
                     'url' => $result['url'],
                     'tradeno' => $result['pid'],
                 ];
-	  case 'bitpayx':
- 		$result = json_decode($result, true);
-		if ($result['errcode'] != 0 ) {
-		    return $response->getBody()->write(json_encode([ 'success' => 0, 'message' => $result['errmsg']]));
-		}
+                break;
+            case 'bitpayx':
+                $result = json_decode($result, true);
+                if ($result['errcode'] != 0 ) {
+                    return $response->getBody()->write(json_encode([ 'success' => 0, 'message' => $result['errmsg']]));
+                }
                 $data = [
                     'success' => 1,
                     'url' => $result['url'],
                     'tradeno' => $result['pid'],
                 ];
-	}
-	file_put_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$data['tradeno']}", "{$shop->id},{$code}");
-	return $response->getBody()->write(json_encode($data));
+                break;
+            case 'paybeaver':
+                $result = json_decode($result, true);
+                if ($result['code'] != 0 ) {
+                    return $response->getBody()->write(json_encode([ 'success' => 0, 'message' => $result['msg']]));
+                }
+                $data = [
+                    'success' => 1,
+                    'url' => $result['url'],
+                    'tradeno' => $result['pid'],
+                ];
+                break;
+        }
+        file_put_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$data['tradeno']}", "{$shop->id},{$code}");
+        return $response->getBody()->write(json_encode($data));
     }
 
     public function getPurchaseDirectlyStatus($request, $response, $args) {

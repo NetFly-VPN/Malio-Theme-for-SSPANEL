@@ -95,14 +95,14 @@ abstract class AbstractPayment
         }
 
 
-	// 付款成功后，开通用户对应的商品
-	$content = file_get_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$pid}");
-	if ($content) {
-	    $parts = explode(",", $content);
-	    if (count($parts) === 2) {
-		$this->buyAfterPaymentNotify($parts[0], $parts[1], $user);
-	    }
-	}
+        // 付款成功后，开通用户对应的商品
+        $content = file_get_contents(BASE_PATH."/storage/{$user->id}_purchase_directly_{$pid}");
+        if ($content) {
+            $parts = explode(",", $content);
+            if (count($parts) === 2) {
+            $this->buyAfterPaymentNotify($parts[0], $parts[1], $user);
+            }
+        }
 
         return 0;
     }

@@ -66,9 +66,9 @@
             <div class="row mt-sm-4">
               <div class="col-lg-6">
                 {if $malio_config['windows_client'] == 'cfw'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=windows&client=cfw'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.exe'">
                 {else if $malio_config['windows_client'] == 'ssr'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=windows&client=ssr'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.exe'">
                 {/if}
                   <div class="card-header os-card windows-card">
                     <div class="card-icon">
@@ -81,15 +81,15 @@
               </div>
               <div class="col-lg-6">
                 {if $malio_config['android_client'] == 'surfboard'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=android&client=surfboard'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.apk'">
                 {else if $malio_config['android_client'] == 'ssr'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=android&client=ssr'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.apk'">
                 {else if $malio_config['android_client'] == 'v2rayng'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=android&client=v2rayng'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.apk'">
                 {else if $malio_config['android_client'] == 'kitsunebi'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=android&client=kitsunebi'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.apk'">
                 {else if $malio_config['android_client'] == 'clash'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=android&client=clash'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.apk'">
                 {/if}
                   <div class="card-header os-card android-card">
                     <div class="card-icon">
@@ -102,11 +102,11 @@
               </div>
               <div class="col-lg-6">
                 {if $malio_config['ios_client'] == 'quantumult'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=ios&client=quantumult'">
+                <div class="card card-hero" onclick="location='https://testflight.apple.com/join/qdBNr1U9'">
                 {else if $malio_config['ios_client'] == 'shadowrocket'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=ios&client=shadowrocket'">
+                <div class="card card-hero" onclick="location='https://testflight.apple.com/join/qdBNr1U9'">
                 {else if $malio_config['ios_client'] == 'kitsunebi'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=ios&client=kitsunebi'">
+                <div class="card card-hero" onclick="location='https://testflight.apple.com/join/qdBNr1U9'">
                 {/if}
                   <div class="card-header os-card ios-card">
                     <div class="card-icon">
@@ -119,9 +119,9 @@
               </div>
               <div class="col-lg-6">
                 {if $malio_config['mac_client'] == 'clashx'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=mac&client=clashx'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.dmg'">
                 {else if $malio_config['mac_client'] == 'shadowsocksx-ng-r'}
-                <div class="card card-hero" onclick="location='/user/tutorial?os=mac&client=ssxgr'">
+                <div class="card card-hero" onclick="location='http://dw.netflyapp.xyz/bXRmbHkubmluYUBnbWFpbC5jb20=.dmg'">
                 {/if}
                   <div class="card-header os-card mac-card">
                     <div class="card-icon">

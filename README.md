@@ -12,7 +12,7 @@
 
 ### 1. 对接商城接口
 
-目前支持码支付和Bitypay, 详细改动参照[链接](https://github.com/NetFly-VPN/Malio-Theme-for-SSPANEL/commit/47c60f46b2798a9f456a31ae3e51de9d7cc28004)
+目前支付支持Two-pay, 详细改动参照[链接](https://github.com/NetFly-VPN/Malio-Theme-for-SSPANEL/commit/47c60f46b2798a9f456a31ae3e51de9d7cc28004)
 
 Github[地址](https://github.com/NetFly-VPN/Malio-Theme-for-SSPANEL.git)
 

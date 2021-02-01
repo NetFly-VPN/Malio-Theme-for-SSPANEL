@@ -6,54 +6,21 @@
 
 
 
-## 对接Gateway
+## 对接支付
+
+目前支付, 只支持Two-pay, 网站地址[链接](https://seller.two-pay.com)
 
 
 
-### 1. 对接商城接口
 
-目前支付支持Two-pay, 详细改动参照[链接](https://github.com/NetFly-VPN/Malio-Theme-for-SSPANEL/commit/47c60f46b2798a9f456a31ae3e51de9d7cc28004)
+
+## 对接面板
 
 Github[地址](https://github.com/NetFly-VPN/Malio-Theme-for-SSPANEL.git)
 
-commit Hash:**47c60f46b2798a9f456a31ae3e51de9d7cc28004**
 
 
-
-
-
-
-
-### 2. 注册接口
-
-
-
-因为原版注册接口加入了人机校验, 以至于直接调用注册接口会失败. 所以另外扩展注册接口, 方法就是讲原来注册接口中关于人机校验部分的逻辑去掉.
-
-在routes.php中增加:
-
-```
-// Auth
-$app->group('/auth', function () {
-   	...
-    $this->post('/register_app', App\Controllers\AuthController::class . ':registerAppHandle');
-    ...
-})->add(new Guest());
-```
-
-
-
-增加方法registerAppHandle, 实现逻辑复制AuthController.registerHandle方法, 删除下面相关判断:
-
-```
-if (Config::get('enable_reg_captcha') === true) {
-		...
-}
-```
-
-
-
-### 3. 网关Gateway 程序
+### 网关Gateway 程序
 
 
 

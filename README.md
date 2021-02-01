@@ -83,6 +83,8 @@ if (Config::get('enable_reg_captcha') === true) {
 
 #### 配置
 
+配置文件位置:**/root/netfly/config.yaml**
+
 关于Gateway的配置, 里面主要包含几部分:
 
 1. malio面板的地址. 

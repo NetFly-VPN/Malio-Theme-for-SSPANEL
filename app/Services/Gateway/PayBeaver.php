@@ -65,6 +65,7 @@ class PayBeaver extends AbstractPayment
         $pl->userid = $user->id;
         $pl->total = $price;
         $pl->tradeno = self::generateGuid();
+        $pl->datetime = time();
         $pl->save();
         $data['app_id'] = Config::get('paybeaver_app_id');
         $data['out_trade_no'] = $pl->tradeno;

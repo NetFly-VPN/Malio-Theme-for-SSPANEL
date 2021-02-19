@@ -168,13 +168,13 @@ class VueController extends BaseController
         $res['inviteInfo'] = array(
             'code' => $code,
             'paybacks' => $paybacks,
-            'paybacks_sum' => $paybacks_sum,
-            'invite_num' => $user->invite_num,
-            'invitePrice' => Config::get('invite_price'),
-            'customPrice' => Config::get('custom_invite_price'),
-            'invite_gift' => Config::get('invite_gift'),
-            'invite_get_money' => Config::get('invite_get_money'),
-            'code_payback' => Config::get('code_payback'),
+            'paybacks_sum' => (int)$paybacks_sum,
+            'invite_num' => (int)$user->invite_num,
+            'invitePrice' => (int)Config::get('invite_price'),
+            'customPrice' => (int)Config::get('custom_invite_price'),
+            'invite_gift' => (float)Config::get('invite_gift'),
+            'invite_get_money' => (float)Config::get('invite_get_money'),
+            'code_payback' => (float)Config::get('code_payback'),
         );
 
         $res['ret'] = 1;

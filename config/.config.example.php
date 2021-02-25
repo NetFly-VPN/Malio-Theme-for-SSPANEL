@@ -69,7 +69,7 @@ $_ENV['backup_notify'] = false;		//备份通知到TG群中
 
 
 //用户注册设置-----------------------------------------------------------------------------------------
-$_ENV['register_mode'] = 'open';					//注册模式。close：关闭，open：开放，invite：仅限邀请码
+$_ENV['register_mode'] = 'invite';					//注册模式。close：关闭，open：开放，invite：仅限邀请码
 $_ENV['defaultTraffic'] = 1;						//用户初始流量 单位GB
 $_ENV['user_expire_in_default'] = 3650;			//用户账户过期时间，在注册时设置。（天）
 $_ENV['user_class_default'] = 0;					//用户注册等级，在注册时设置。

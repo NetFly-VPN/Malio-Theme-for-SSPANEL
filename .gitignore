@@ -44,6 +44,7 @@ malio-release.js
 malio.js
 resources/email/template
 .i18n.php
-/storage/_purchase_directly_1
-/storage/1_purchase_directly_1
 /storage/last_detect_gfw_time
+log
+/storage/*_purchase_directly_*
+/public/.well-known

@@ -245,7 +245,12 @@ $_ENV['enable_checkin_captcha'] = false;	//启用签到验证码
 //支付系统设置----------------------------------------------------------------------------------------
 #取值 none | codepay | trimepay | f2fpay | chenAlipay | paymentwall | spay | tomatopay | bitpayx | flyfoxpay | payjs | f2fpay_payjs | stripe | payssion | yftpay
 # 当此项设置为 malio 时即可使用malio聚合支付系统
-$_ENV['payment_system']='none';
+$_ENV['payment_system']='paybeaver';
+
+#two-pay
+$_ENV['paybeaver_app_id'] = '';
+$_ENV['paybeaver_app_secret'] = '';
+$_ENV['paybeaver_url'] = 'https://api.two-pay.com/1eaf11';
 
 # Stripe
 $_ENV['stripe_key'] = '';

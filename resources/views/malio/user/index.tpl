@@ -271,7 +271,11 @@
                       <h4><i class="fas fa-bullhorn"></i> {$i18n->get('announcement')}</h4>
                     </div>
                     <div class="card-body">
-                      {$ann->content}
+                      {if isset($foo)}
+                        {$ann->content or ""}
+                      {else}
+                        [暂无公告]
+                      {/if}
                     </div>
                   </div>
 

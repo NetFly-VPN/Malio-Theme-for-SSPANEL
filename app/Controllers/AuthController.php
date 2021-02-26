@@ -261,7 +261,7 @@ class AuthController extends BaseController
         if (MalioConfig::get('only_one_lang') != 'none') {
             $i18n->lang = MalioConfig::get('only_one_lang');
         } else {
-            $i18n->detectLang($request, $response, $args);
+            $i18n->detectLang($request, $response, $next);
         }
 
         return $this->view()

@@ -614,17 +614,17 @@ class Tools
                 if (strpos($item['port'], '+') !== false) { // 多个单端口节点，格式：8.8.8.8;port=80#1080+443#8443
                     $args_explode = explode('+', $item['port']);
                     foreach ($args_explode as $arg) {
-                        if ((int) substr($arg, 0, strpos($arg, '#')) == $mu_port) {
-                            $node_port = (int) substr($arg, strpos($arg, '#') + 1);
+                        if ((int)substr($arg, 0, strpos($arg, '#')) == $mu_port) {
+                            $node_port = (int)substr($arg, strpos($arg, '#') + 1);
                         }
                     }
                 } else {
-                    if ((int) substr($item['port'], 0, strpos($item['port'], '#')) == $mu_port) {
-                        $node_port = (int) substr($item['port'], strpos($item['port'], '#') + 1);
+                    if ((int)substr($item['port'], 0, strpos($item['port'], '#')) == $mu_port) {
+                        $node_port = (int)substr($item['port'], strpos($item['port'], '#') + 1);
                     }
                 }
             } else { // 端口偏移，偏移端口，格式：8.8.8.8;port=1000 or 8.8.8.8;port=-1000
-                $node_port = ($mu_port + (int) $item['port']);
+                $node_port = ($mu_port + (int)$item['port']);
             }
         }
 

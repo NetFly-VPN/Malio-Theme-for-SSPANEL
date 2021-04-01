@@ -251,6 +251,13 @@ class URL
         //         'regex'   => '.*香港.*HKBN.*',
         //     ]
         // ];
+        // is_mu 表示是否合并订阅
+        /*
+            node中的mu_only说明:
+            mu_only= -1; 普通端口节点
+            mu_only= 0; // 普通端口和单端口共存的节点
+            mu_only = 1; //只开启单端口多用户的节点
+        */
         $is_mu = $Rule['is_mu'];
         $is_ss = 0;
         $emoji = (isset($Rule['emoji']) ? $Rule['emoji'] : false);
@@ -374,7 +381,7 @@ class URL
                     continue;
                 }
                 if (in_array($node->sort, [0, 10]) && $node->mu_only != 1 && ($is_mu == 0 || ($is_mu != 0 && Config::get('mergeSub') === true))) {
-                    // 节点非只启用单端口 && 只获取普通端口
+                    // 节点不是(只启用单端口 && 只获取普通端口)
                     if ($node->sort == 10) {
                         // SS 中转
                         $relay_rule_id = 0;
@@ -401,7 +408,7 @@ class URL
                     }
                 }
                 if (in_array($node->sort, [0, 10]) && $node->custom_rss == 1 && $node->mu_only != -1 && $is_mu != 0) {
-                    // 非只启用普通端口 && 获取单端口
+                    // 不是只启用普通端口的节点 && 获取单端口
                     foreach ($mu_nodes as $mu_node) {
                         if ($node->sort == 10) {
                             // SS 中转
@@ -1004,6 +1011,7 @@ class URL
             $node_name .= ' - ' . $relay_rule->dist_node()->name;
         }
         if ($mu_port != 0) {
+            //说明是单端口多用户节点, $mu_port存储的是单端口
             $mu_user = User::where('port', '=', $mu_port)->where('is_multi_user', '<>', 0)->first();
             if ($mu_user == null) {
                 return;

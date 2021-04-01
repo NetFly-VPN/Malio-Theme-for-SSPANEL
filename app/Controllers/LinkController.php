@@ -150,11 +150,13 @@ class LinkController extends BaseController
                     if ($key == 'list') {
                         $SubscribeExtend = self::getSubscribeExtend($query_value);
                     } else {
+                        // 构建获取订阅内容的方法, 比如订阅链接是xxxx/link/token?sub=1, 这里的key=sub, $query_value=1
                         $SubscribeExtend = self::getSubscribeExtend($key, $query_value);
                     }
                     $filename = $SubscribeExtend['filename'] . '_' . time() . '.' . $SubscribeExtend['suffix'];
                     $subscribe_type = $SubscribeExtend['filename'];
                     $Cache = false;
+                    // 拼接方法名, class=getSub
                     $class = ('get' . $SubscribeExtend['class']);
                     if (Config::get('enable_sub_cache') === true) {
                         $Cache = true;
@@ -165,6 +167,7 @@ class LinkController extends BaseController
                         }
                         self::SubscribeCache($user, $path, $content);
                     } else {
+                        // 获取订阅内容, $class存储的是方法名
                         $content = self::$class($user, $query_value, $opts, $Rule);
                     }
                     $getBody = self::getBody(

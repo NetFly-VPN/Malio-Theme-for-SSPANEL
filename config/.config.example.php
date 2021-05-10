@@ -507,6 +507,9 @@ $_ENV['relay_insecure_mode'] = false;		//强烈推荐不开启
 $_ENV['enable_analytics_code'] = false;
 $_ENV['sspanelAnalysis'] = true;
 
+#---------------------netfly自定义设置
+$_ENV['alive_ip_time'] = 300; // alive_ip 保存多久时间, 默认300秒, 单位为秒
+
 
 #在套了CDN之后获取用户真实ip，如果您不知道这是什么，请不要乱动
 if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) {

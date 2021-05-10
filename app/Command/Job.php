@@ -443,7 +443,10 @@ class Job
             }
         }
 
-        Ip::where('datetime', '<', time() - 300)->delete();
+        $liveTime = (int) Config::get('alive_ip_time');
+        if ($liveTime >= 0) {
+            Ip::where('datetime', '<', time() - $liveTime)->delete();
+        }
         UnblockIp::where('datetime', '<', time() - 300)->delete();
         BlockIp::where('datetime', '<', time() - 86400)->delete();
         TelegramSession::where('datetime', '<', time() - 900)->delete();

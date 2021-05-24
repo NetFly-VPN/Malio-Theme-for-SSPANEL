@@ -199,6 +199,8 @@ $app->group('/auth', function () {
     $this->get('/register', App\Controllers\AuthController::class . ':register');
     $this->post('/register', App\Controllers\AuthController::class . ':registerHandle');
     $this->post('/register_app', App\Controllers\AuthController::class . ':registerAppHandle');
+    // 通过设备ID进行注册, 设备id作为账户名称
+    $this->post('/register_device', App\Controllers\AuthController::class . ':registerWithDeviceHandle');
     $this->post('/send', App\Controllers\AuthController::class . ':sendVerify');
     $this->post('/sendsms', App\Controllers\AuthController::class . ':sendSMS');
     $this->get('/logout', App\Controllers\AuthController::class . ':logout');

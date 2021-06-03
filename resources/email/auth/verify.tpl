@@ -133,6 +133,10 @@
                     <font face="'Nunito', sans-serif" color="#585858" style="font-size: 24px; line-height: 32px;">
                       <span style="font-family: 'Nunito', Arial, Tahoma, Geneva, sans-serif; color: #aaaaaa; font-size: 16px; line-height: 32px;">(如果您从未请求发送邮箱验证码，请忽略此邮件)</span>
                     </font>
+                    <br>
+                    <font face="'Nunito', sans-serif" color="#585858" style="font-size: 24px; line-height: 32px;">
+                      <span style="font-family: 'Nunito', Arial, Tahoma, Geneva, sans-serif; color: #585858; font-size: 24px; line-height: 32px;">防丢邮箱:{$reply_to}</span>
+                    </font>
                     <div style="height: 33px; line-height: 33px; font-size: 31px;">&nbsp;</div>
                     <table class="mob_btn" cellpadding="0" cellspacing="0" border="0" style="background: #6777ef; border-radius: 4px;">
                       <tr>

@@ -56,6 +56,7 @@ $_ENV['smtp_name'] = '';
 $_ENV['smtp_sender'] = '';
 $_ENV['smtp_passsword'] = '';
 $_ENV['smtp_ssl'] = true;
+$_ENV['smtp_replyTo'] = ""; // 回信地址
 
 # sendgrid
 $_ENV['sendgrid_key'] = '';
